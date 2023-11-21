@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link  href="static/favicon.ico"  rel="shortcut icon" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js"></script>
+    <title>星曦向荣-APP续期</title>
+</head>
+<body>
+    <div class="container">
+<!--        <div class="row">-->
+            <section class="mx-auto card mt-3">
+                <div class="card-header p-5 bg-success text-center text-white">
+                    <h3 >ZH Tools安卓应用续期</h3>
+                        <li>只有APP版本在<kbd>V23.03.08</kbd>及以上才能使用自助续期功能</li>
+                        <li>续期功能一天只能使用一次</li>
+                        <li>使用此功能前APP需要先连上服务器</li>
+
+                </div>
+                <div class="card-body bg-warning">
+                    <div class="content">
+                        <form class="was-validated" onsubmit="return false;">
+                            <div class="pb-3 pt-3" title="">
+                                <label class="control-label" for="phoneId">APP ID：</label>
+                                <input class="form-control" type="text"  id="phoneId" name="phoneId" placeholder="请输入APP设置里的ID" required>
+<!--                                <div class="valid-feedback">有效的。</div>-->
+                                <div class="invalid-feedback">请填写此字段。</div>
+                            </div>
+                            <div class="pb-3" title="">
+                                <label class="control-label" for="version">APP版本号：</label>
+                                <input class="form-control" type="text" id="version" name="version" placeholder="请输入APP的版本号" required>
+<!--                                <div class="valid-feedback">有效的。</div>-->
+                                <div class="invalid-feedback">请填写此字段。</div>
+                            </div>
+                            <div class="pb-3" title="">
+                                <label class="control-label" for="code">验证码：
+                                    <img th:src="@{/getVerify/math}" title="点击切换" id="img-code" data-bs-toggle="tooltip" style="height: 50px" class="rounded img-fluid" onclick="resetImgCode()" alt="验证码">
+                                </label>
+                                <input class="form-control" type="text" id="code" name="code" placeholder="请输入图中验证码的计算结果" required>
+                                <div class="invalid-feedback">请填写此字段。</div>
+                            </div>
+                            <div class="pb-4 d-grid" title="">
+                                <input type="submit" class="btn btn-outline-info btn-block" onclick="SubMit()"  id="btn_submit" value="提交" >
+                            </div>
+                            <div class="text-center" id="div-result">
+                                <p>您的续期秘钥为：<kbd class="" id="result"></kbd> 续期秘钥有效期为一个小时，请尽快使用</p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-footer p-3 bg-secondary text-white text-center">
+                    <p><a th:href="${main_url}">@星曦向荣</a></p>
+                </div>
+            </section>
+<!--        </div>-->
+    </div>
+<script>
+    $("#div-result").hide();
+    function resetImgCode() {
+        $("#code").val(null);
+        $("#img-code").attr("src", "getVerify/math?t=" + new Date().getTime());
+    }
+    function SubMit() {
+        let id=$("#phoneId").val();
+        let version=$("#version").val();
+        let code=$("#code").val();
+        if (id.length>0){
+            if (version.length>0){
+                if (code.length>0){
+                    $("#div-result").hide();
+                    checkCode(code);
+                }else {
+                    alert("请输入验证码");
+                }
+            }else {
+                alert("请输入APP的版本号");
+            }
+        } else {
+            alert("请输入APP的ID");
+        }
+        return false;
+    }
+    function checkCode(code) {
+        $.ajax({
+            url: "getVerify/math/checking",
+            type: "post",
+            dataType: "json",
+            data: {
+                code: code,
+                isClear: false
+            },
+            success: function (d) {
+                if (d.code == 200) {
+                    sub();
+                } else {
+                    resetImgCode();
+                    alert(d.title+': '+d.message);
+                    return false;
+                }
+            },
+            error: function (e) {
+                alert("验证错误！" + e);
+                return false;
+            }
+        });
+    }
+    function sub() {
+        $("#btn_submit").attr("disabled", true);
+        let id=$("#phoneId").val();
+        let version=$("#version").val();
+        let code=$("#code").val();
+        $.ajax({
+            url: "3_form",
+            type: "post",
+            dataType: "json",
+            data: {
+                code: code,
+                phoneId:id,
+                version:version,
+            },
+            success: function (d) {
+                if (d.code == 200) {
+                    $("#result").text(d.message);
+                    $("#div-result").show();
+                    $("#phoneId").val(null);
+                    $("#version").val(null);
+                } else {
+                    alert(d.title+': '+d.message);
+                }
+                $("#btn_submit").attr("disabled", false);
+            },
+            error: function (e) {
+                alert("提交错误！" + e);
+                $("#btn_submit").attr("disabled", false);
+            }
+        });
+        resetImgCode();
+    }
+</script>
+<script th:src="@{static/js/client-info.js}"></script>
+
+</body>
+</html>

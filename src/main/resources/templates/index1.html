@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+
+    <title>星曦向荣</title>
+</head>
+<body>
+<div class="container pt-5">
+    <blockquote class="blockquote">
+        <p class="display-1 text-info"><b>星曦向荣网</b></p>
+        <footer class="blockquote-footer">欢迎来自<cite class="mark" th:text="${address}"></cite>的用户
+        </footer>
+    </blockquote>
+    <dl>
+        <dt class="text-success"><i class="fa fa-weixin"></i> 微信公众号</dt>
+        <a class="text-success" th:href="${weixin_url}">
+            <dd>- <code>星曦向荣</code>个人微信公众号</dd>
+        </a>
+
+
+        <dt class="text-body"><i class="fa fa-github"></i> GitHub</dt>
+        <a class="text-body" href="https://github.com/ZhangHeng0805">
+            <dd>- <code>ZhangHeng0805</code>个人主页</dd>
+        </a>
+
+
+        <dt class="text-primary"><i class="fa fa-android"></i> 工具APP</dt>
+        <a class="text-primary" th:href="${app_url}">
+            <dd>- <code th:text="${app_name}">ZH Tools</code>一款可以免费搜索音乐、影视、实时疫情、翻译、天气、字典...的自制安卓工具APP，欢迎下载体验！</dd>
+        </a>
+    </dl>
+</div>
+
+<script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.min.js"></script>
+<script th:src="@{/static/js/client-info.js}"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js"></script>
+</body>
+</html>

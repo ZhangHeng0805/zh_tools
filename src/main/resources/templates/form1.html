@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>报表展示</title>
+</head>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    #frame1{
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+</style>
+
+<body>
+
+    <iframe th:src="@{${main_url}+'2'}" id="frame1" frameborder="0"></iframe>
+    <a th:href="${main_url}"><p>测试报表</p></a>
+</body>
+</html>

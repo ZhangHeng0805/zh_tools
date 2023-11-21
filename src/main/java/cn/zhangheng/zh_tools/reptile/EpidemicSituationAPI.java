@@ -1,0 +1,490 @@
+package cn.zhangheng.zh_tools.reptile;
+
+import cn.hutool.core.swing.clipboard.ClipboardUtil;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.zhangheng.log.Log;
+import com.zhangheng.util.TimeUtil;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+import java.io.IOException;
+import java.util.*;
+
+/**
+ * 疫情API
+ *
+ * @author 张恒
+ * @program: reptile
+ * @email zhangheng.0805@qq.com
+ * @date 2022-09-30 07:29
+ */
+public class EpidemicSituationAPI {
+    /**
+     * 获取全球实时新冠疫情数据
+     *
+     * @return json json数据
+     */
+    public static String getCOVID19_JSON() throws IOException {
+        String json = "";
+        try {
+            int ceil = (int) Math.ceil(1e5 * Math.random());
+            String Url = "https://voice.baidu.com/api/newpneumonia?from=page&callback=jsonp_" + new Date().getTime() + "_" + ceil;
+            Document doc = Jsoup.connect(Url).get();
+            json = doc.getElementsByTag("body").text();
+            json = StrUtil.sub(json, json.indexOf("(") + 1, -1);
+            json = json.replace("\\/", "/");
+        } catch (IOException e) {
+            Log.error("第三方新冠疫情[https://voice.baidu.com/api/newpneumonia]数据获取失败:" + e.getMessage());
+        }
+        return json;
+    }
+
+    /**
+     * 解析新冠疫情JSON数据
+     * 获取各省级疫情信息
+     *
+     * @param json getCOVID19_JSON()
+     * @return {upateTime:更新时间,caseList:[{area:地区,updateTime:更新时间,confirmed:累计确诊,died:累计死亡,
+     * crued:累计治愈,confirmedRelative:新增确诊(相对前一天),diedRelative:新增死亡(相对前一天),curedRelative:新增治愈(相对前一天),
+     * asymptomaticRelative:新增无症状(相对前一天),asymptomaticLocalRelative:新增本地无症状(相对前一天),asymptomatic:累计无症状,
+     * nativeRelative:新增本地确诊(相对前一天),curConfirm:现有确诊,curConfirmRelative:相对现有确诊(相对前一天),
+     * noNativeRelativeDays:没有新增病历的天数,overseasInputRelative:新增境外输入(相对前一天),moreUrl:详情链接,totalNum:中高风险地区数}]}
+     */
+    public static List<Map<String, String>> getCOVID19_Provincial_Data(String json) throws IOException {
+        List<Map<String, String>> case_list = new ArrayList<>();
+        if (!StrUtil.isEmptyIfStr(json)) {
+            JSONObject obj = JSONUtil.parseObj(json);
+            Integer status = obj.getInt("status");
+            if (status.equals(0)) {
+                JSONObject data = obj.getJSONObject("data");
+                //更新时间
+//                String upateTime = data.getStr("upateTime");
+//                map.put("upateTime", upateTime);
+                //全国各地疫情数据
+                JSONArray caseList = data.getJSONArray("caseList");
+                for (Object c : caseList) {
+                    Map<String, String> cMap = new HashMap<>();
+                    JSONObject jc = JSONUtil.parseObj(c);
+                    //相对时间
+//                    String relativeTime = jc.getStr("relativeTime");
+//                    Date date = com.zhangheng.weixin1.utils.TimeUtil.fromUnixToTime(relativeTime);
+//                    cMap.put("relativeTime", TimeUtil.toTime(date));
+                    //更新时间
+                    String updateTime = jc.getStr("updateTime");
+                    Date date = TimeUtil.UnixToDate(updateTime);
+                    cMap.put("updateTime", TimeUtil.toTime(date));
+                    //省份
+                    String area = jc.getStr("area");
+                    cMap.put("area", area);
+                    //累计确诊
+                    String confirmed = jc.getStr("confirmed");
+                    cMap.put("confirmed", confirmed);
+                    //累计死亡
+                    String died = jc.getStr("died");
+                    cMap.put("died", died);
+                    //累计治愈
+                    String crued = jc.getStr("crued");
+                    cMap.put("crued", crued);
+                    //新增确诊(相对前一天)
+                    String confirmedRelative = jc.getStr("confirmedRelative");
+                    cMap.put("confirmedRelative", confirmedRelative);
+                    //新增死亡(相对前一天)
+                    String diedRelative = jc.getStr("diedRelative");
+                    cMap.put("diedRelative", diedRelative);
+                    //新增治愈(相对前一天)
+                    String curedRelative = jc.getStr("curedRelative");
+                    cMap.put("curedRelative", curedRelative);
+                    //新增无症状(相对前一天)
+                    String asymptomaticRelative = jc.getStr("asymptomaticRelative");
+                    cMap.put("asymptomaticRelative", asymptomaticRelative);
+                    //新增本地无症状(相对前一天)
+                    String asymptomaticLocalRelative = jc.getStr("asymptomaticLocalRelative");
+                    cMap.put("asymptomaticLocalRelative", asymptomaticLocalRelative);
+                    //累计无症状
+                    String asymptomatic = jc.getStr("asymptomatic");
+                    cMap.put("asymptomatic", asymptomatic);
+                    //新增本地确诊(相对前一天)
+                    String nativeRelative = jc.getStr("nativeRelative");
+                    cMap.put("nativeRelative", nativeRelative);
+                    //现有确诊
+                    String curConfirm = jc.getStr("curConfirm");
+                    cMap.put("curConfirm", curConfirm);
+                    //相对现有确诊(相对前一天)
+                    String curConfirmRelative = jc.getStr("curConfirmRelative");
+                    cMap.put("curConfirmRelative", curConfirmRelative);
+                    //没有新增病历的天数
+                    String noNativeRelativeDays = jc.getStr("noNativeRelativeDays");
+                    cMap.put("noNativeRelativeDays", StrUtil.isEmptyIfStr(noNativeRelativeDays) ? "" : noNativeRelativeDays);
+                    //新增境外输入(相对前一天)
+                    String overseasInputRelative = jc.getStr("overseasInputRelative");
+                    cMap.put("overseasInputRelative", StrUtil.isEmptyIfStr(overseasInputRelative) ? "" : overseasInputRelative);
+
+                    /*风险地区*/
+                    JSONObject dj = jc.getJSONObject("dangerousAreas");
+                    //详情链接
+                    String moreUrl = dj.getStr("moreUrl");
+                    cMap.put("moreUrl", moreUrl);
+                    //中高风险地区数
+                    Integer totalNum = dj.getInt("totalNum");
+                    cMap.put("totalNum", totalNum.toString());
+
+                    /*省内地级市数据*/
+                    JSONArray subList = jc.getJSONArray("subList");
+                    StringBuilder sb = new StringBuilder("");
+                    if (!subList.isEmpty()) {
+                        sb.append("*地级市情况:\n");
+                        for (Object o : subList) {
+                            JSONObject object = JSONUtil.parseObj(o);
+                            String update_time = object.getStr("updateTime");
+                            Date d = TimeUtil.UnixToDate(update_time);
+                            sb.append("-《" + object.getStr("city") + "》");
+                            String confirmed1 = object.getStr("confirmed");
+                            if (!StrUtil.isEmpty(confirmed1)) {
+                                sb.append("累计确诊[" + confirmed1 + "] ");
+                            }
+                            String crued1 = object.getStr("crued");
+                            if (!StrUtil.isEmpty(crued1)) {
+                                sb.append("累计治愈[" + crued1 + "] ");
+                            }
+                            String died1 = object.getStr("died");
+                            if (!StrUtil.isEmpty(died1)) {
+                                sb.append("累计死亡[" + died1 + "] ");
+                            }
+                            String curConfirm1 = object.getStr("curConfirm");
+                            if (!StrUtil.isEmpty(curConfirm1) && !curConfirm1.equals("0")) {
+                                sb.append("现有确诊[" + curConfirm1 + "] ");
+                            }
+                            String asymptomaticRelative1 = object.getStr("asymptomaticRelative");
+                            if (!StrUtil.isEmpty(asymptomaticRelative1) && !asymptomaticRelative1.equals("0")) {
+                                sb.append("新增无症状[" + asymptomaticRelative1 + "] ");
+                            }
+                            String confirmedRelative1 = object.getStr("confirmedRelative");
+                            if (!StrUtil.isEmpty(confirmedRelative1) && !confirmedRelative1.equals("0")) {
+                                sb.append("新增确诊[" + confirmedRelative1 + "] ");
+                            }
+                            String nativeRelativeDays = object.getStr("noNativeRelativeDays");
+                            if (!StrUtil.isEmpty(nativeRelativeDays)) {
+                                sb.append("无疫情情况[" + nativeRelativeDays + "] ");
+                            }
+//                            sb.append("更新时间[" + TimeUtil.toTime(d) + "]\n");
+                            sb.append("\n");
+
+                        }
+                    }
+                    cMap.put("subList", sb.toString());
+
+
+                    case_list.add(cMap);
+                }
+//                map.put("caseList", case_list);
+            } else {
+                Log.error("第三方新冠疫情[https://voice.baidu.com/api/newpneumonia]省级数据获取错误:" + obj.getStr("msg"));
+            }
+        }
+        return case_list;
+    }
+
+    /**
+     * 解析新冠疫情JSON数据
+     * 获取疫情概要信息
+     *
+     * @param json getCOVID19_JSON()
+     * @return {upateTime:更新时间,summaryDataIn:{confirmed:累计确诊,cured:累计治愈,died:累计死亡},
+     * dataRelativeYestday:{confirmed:与昨天相比的累计确诊,cured:昨天相比的累计治愈,died:昨天相比的累计死亡}}
+     */
+    public static Map<String, Map<String, Integer>> getCOVID19_Resumes_Data(String json) throws IOException {
+        Map<String, Map<String, Integer>> map = new HashMap<>();
+        if (!StrUtil.isEmptyIfStr(json)) {
+            JSONObject obj = JSONUtil.parseObj(json);
+            Integer status = obj.getInt("status");
+            if (status.equals(0)) {
+                JSONObject data = obj.getJSONObject("data");
+//                //更新时间
+//                String upateTime = data.getStr("upateTime");
+//                map.put("upateTime", upateTime);
+
+                /*当前国内的疫情概要数据*/
+                JSONObject summaryDataIn = data.getJSONObject("summaryDataIn");
+                Map<String, Integer> DataInMap = new HashMap<>();
+                //累计确诊
+                Integer confirmed = summaryDataIn.getInt("confirmed");
+                DataInMap.put("confirmed", confirmed);
+                //累计治愈
+                Integer cured = summaryDataIn.getInt("cured");
+                DataInMap.put("cured", cured);
+                //累计死亡
+                Integer died = summaryDataIn.getInt("died");
+                DataInMap.put("died", died);
+                map.put("summaryDataIn", DataInMap);
+
+                /*当前和昨天的国内疫情对比的概要数据*/
+                JSONObject summaryDataRelativeYestday = data.getJSONObject("summaryDataRelativeYestday");
+                Map<String, Integer> DataRelativeYestdayMap = new HashMap<>();
+                //与昨天相比的累计确诊
+                Integer confirmed1 = summaryDataRelativeYestday.getInt("confirmed");
+                DataRelativeYestdayMap.put("confirmed", confirmed1);
+                //与昨天相比的累计治愈
+                Integer cured1 = summaryDataRelativeYestday.getInt("cured");
+                DataRelativeYestdayMap.put("cured", cured1);
+                //与昨天相比的累计死亡
+                Integer died1 = summaryDataRelativeYestday.getInt("died");
+                DataRelativeYestdayMap.put("died", died1);
+                map.put("dataRelativeYestday", DataRelativeYestdayMap);
+
+            } else {
+                Log.error("第三方新冠疫情[https://voice.baidu.com/api/newpneumonia]概要数据获取错误:" + obj.getStr("msg"));
+            }
+        }
+        return map;
+    }
+
+    /**
+     * 疫情风险地区
+     *
+     * @param json getCOVID19_JSON()
+     * @return [{
+     * address:地区,nativeRelative:新增本土,asymptomaticRelative:新增无症状,
+     * highLevelNum:高风险地区数,midLevelNum:中风险地区数,dangerousAreas:风险地区信息
+     * }]
+     */
+    public static List<Map<String, String>> getCOVID19_Risk_Data(String json) throws IOException {
+        List<Map<String, String>> list = new ArrayList<>();
+        try {
+            JSONArray jsonArray = JSONUtil.parseObj(json).getJSONObject("data").getJSONObject("resumes").getJSONObject("china").getJSONArray("list");
+            for (Object o : jsonArray) {
+                JSONObject obj = JSONUtil.parseObj(o);
+                Map<String, String> map = new HashMap<>();
+                //地区
+                String address = obj.getStr("province") + "-" + obj.getStr("area");
+                map.put("address", address);
+                //新增本土
+                String nativeRelative = obj.getStr("nativeRelative");
+                map.put("nativeRelative", nativeRelative);
+                //新增无症状
+                String asymptomaticRelative = obj.getStr("asymptomaticRelative");
+                map.put("asymptomaticRelative", asymptomaticRelative);
+                /*风险地区*/
+                JSONObject dangerousAreas = obj.getJSONObject("dangerousAreas");
+                //高风险地区数
+                String highLevelNum = dangerousAreas.getStr("highLevelNum");
+                map.put("highLevelNum", highLevelNum);
+                //中风险地区数
+                String midLevelNum = dangerousAreas.getStr("midLevelNum");
+                map.put("midLevelNum", midLevelNum);
+                list.add(map);
+                //风险地区信息
+                JSONArray subList = dangerousAreas.getJSONArray("subList");
+                StringBuilder sb = new StringBuilder("");
+                if (!subList.isEmpty()) {
+                    sb.append("*风险地区：\n");
+                    if (subList.size() > 0) {
+                        for (Object sub : subList) {
+                            JSONObject jsonObject = JSONUtil.parseObj(sub);
+                            sb.append("- [" + jsonObject.getStr("level") + "]")
+                                    .append(" " + jsonObject.getStr("area"))
+                                    .append(" <新增:" + jsonObject.getInt("isNew") + ">\n");
+                        }
+                    }
+                }
+                map.put("dangerousAreas", sb.toString());
+//                System.out.println(map);
+            }
+        } catch (Exception e) {
+            Log.error("第三方新冠疫情[https://voice.baidu.com/api/newpneumonia]风险地区数据解析错误:" + e.getMessage());
+        }
+        return list;
+    }
+
+    /**
+     * 将数字转换为带正负符号的字符串
+     *
+     * @param num
+     * @return
+     */
+    public static String numStyle(Integer num) {
+        return num > 0 ? "+" + num : num.toString();
+    }
+
+    /**
+     * 将疫情数据字符串格式化
+     *
+     * @return summary:全国概要数据,
+     * provincial:各省详细数据
+     * risk:风险地区数据
+     */
+    public static Map<String, String[]> getCOVID19_Str(String json) throws IOException {
+//        String json = getCOVID19_JSON();
+        Map<String, String[]> map = new HashMap<>();
+        //全国概要数据
+        Map<String, Map<String, Integer>> resumes_data = getCOVID19_Resumes_Data(json);
+        //各省详细数据
+        List<Map<String, String>> provincial_data = getCOVID19_Provincial_Data(json);
+        //风险地区数据
+        List<Map<String, String>> risk_data = getCOVID19_Risk_Data(json);
+        /*全国概要数据*/
+        String[] summary = new String[1];
+        Map<String, Integer> map1 = resumes_data.get("summaryDataIn");
+        Map<String, Integer> map2 = resumes_data.get("dataRelativeYestday");
+        String upateTime = JSONUtil.parseObj(json).getJSONObject("data").getStr("upateTime");
+        StringBuilder sb = new StringBuilder();
+        sb.append("【今日全国疫情概要数据】\n")
+                .append("* 累计确诊:" + map1.get("confirmed") + " (较昨日" + numStyle(map2.get("confirmed")) + ")\n")
+                .append("* 累计治愈:" + map1.get("cured") + " (较昨日" + numStyle(map2.get("cured")) + ")\n")
+                .append("* 累计死亡:" + map1.get("died") + " (较昨日" + numStyle(map2.get("died")) + ")\n")
+                .append("* 更新时间:" + upateTime)
+//                .append("\n")
+        ;
+        summary[0] = sb.toString();
+        map.put("summary", summary);
+        /*各省详细数据*/
+        String[] provincial = new String[provincial_data.size()];
+        int i = 0;
+        for (Map<String, String> c : provincial_data) {
+            StringBuilder sb2 = new StringBuilder();
+            sb2.append("#" + c.get("area") + "：\n")
+                    .append("累计确诊[" + c.get("confirmed") + "]\n")
+                    .append("累计治愈[" + c.get("crued") + "]\n")
+                    .append("累计死亡[" + c.get("died") + "]\n");
+
+            String confirmedRelative = c.get("confirmedRelative");
+            if (!StrUtil.isEmpty(confirmedRelative) && !confirmedRelative.equals("0")) {
+                sb2.append("新增确诊[" + confirmedRelative + "]\n");
+            }
+            String curedRelative = c.get("curedRelative");
+            if (!StrUtil.isEmpty(curedRelative) && !curedRelative.equals("0")) {
+                sb2.append("新增治愈[" + curedRelative + "]\n");
+            }
+            String diedRelative = c.get("diedRelative");
+            if (!StrUtil.isEmpty(diedRelative) && !diedRelative.equals("0")) {
+                sb2.append("新增死亡[" + diedRelative + "]\n");
+            }
+            String asymptomaticRelative = c.get("asymptomaticRelative");
+            if (!StrUtil.isEmpty(asymptomaticRelative) && !asymptomaticRelative.equals("0")) {
+                sb2.append("新增无症状[" + asymptomaticRelative + "]\n");
+            }
+            String asymptomaticLocalRelative = c.get("asymptomaticLocalRelative");
+            if (!StrUtil.isEmpty(asymptomaticLocalRelative) && !asymptomaticLocalRelative.equals("0")) {
+                sb2.append("新增本地无症状[" + asymptomaticLocalRelative + "]\n");
+            }
+            String asymptomatic = c.get("asymptomatic");
+            if (!StrUtil.isEmpty(asymptomatic) && !asymptomatic.equals("0")) {
+                sb2.append("累计无症状[" + asymptomatic + "]\n");
+            }
+            String nativeRelative = c.get("nativeRelative");
+            if (!StrUtil.isEmpty(nativeRelative) && !nativeRelative.equals("0")) {
+                sb2.append("新增本地确诊[" + nativeRelative + "]\n");
+            }
+            String curConfirm = c.get("curConfirm");
+            if (!StrUtil.isEmpty(curConfirm) && !curConfirm.equals("0")) {
+                sb2.append("现有确诊[" + curConfirm + "]\n");
+            }
+            String curConfirmRelative = c.get("curConfirmRelative");
+            if (!StrUtil.isEmpty(curConfirmRelative) && !curConfirmRelative.equals("0")) {
+                sb2.append("与昨天现有确诊相差[" + numStyle(Integer.valueOf(curConfirmRelative)) + "]\n");
+            }
+            String noNativeRelativeDays = c.get("noNativeRelativeDays");
+            if (!StrUtil.isEmpty(noNativeRelativeDays)) {
+                sb2.append("无新增情况[" + noNativeRelativeDays + "]\n");
+            }
+            String overseasInputRelative = c.get("overseasInputRelative");
+            if (!StrUtil.isEmpty(overseasInputRelative) && !overseasInputRelative.equals("0")) {
+                sb2.append("新增境外输入[" + overseasInputRelative + "]\n");
+            }
+            sb2.append("中高风险地区[" + c.get("totalNum") + "]\n")
+                    .append("更新时间[" + c.get("updateTime") + "]\n")
+                    .append(c.get("subList"))
+//                .append("\n")
+            ;
+            provincial[i++] = sb2.toString();
+        }
+        map.put("provincial", provincial);
+        /*风险地区数据*/
+        String[] risk = new String[risk_data.size()];
+        i = 0;
+        for (Map<String, String> rd : risk_data) {
+            StringBuilder sb2 = new StringBuilder();
+            sb2.append("#" + rd.get("address") + "：\n")
+                    .append("新增本土确诊[" + rd.get("nativeRelative") + "]\t")
+                    .append("新增无症状感染[" + rd.get("asymptomaticRelative") + "]\n")
+                    .append("高风险地区数[" + rd.get("highLevelNum") + "]\t")
+                    .append("中风险地区数[" + rd.get("midLevelNum") + "]\n")
+                    .append("" + rd.get("dangerousAreas"));
+            risk[i++] = sb2.toString();
+//            System.out.println(sb2.toString());
+        }
+        map.put("risk", risk);
+        return map;
+    }
+
+    /**
+     * 从数组中筛选
+     *
+     * @param data
+     * @param filter
+     * @return
+     */
+    public static String[] filter(String[] data, String[] filter) {
+        List<String> list = new ArrayList<>();
+        for (String s : data) {
+            for (String a : filter) {
+                if (s.indexOf(a) > -1) {
+                    list.add(s);
+                }
+            }
+//            System.out.println(s);
+        }
+        String[] arr = new String[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            String s = list.get(i);
+            arr[i] = s;
+//            System.out.println(s);
+        }
+        return arr;
+    }
+
+    /**
+     * 将数据按照一定字数分组
+     *
+     * @param datas
+     * @return
+     */
+    private List<String> organizeData(String[] datas, Integer max) {
+        StringBuilder sb = new StringBuilder("");
+        List<String> list = new ArrayList<>();
+
+        for (String s : datas) {
+            if (sb.length() < max - s.length()) {
+                sb.append(s + "\n");
+            } else {
+                list.add(sb.toString());
+                sb.delete(0, sb.length());
+                sb.append(s + "\n");
+            }
+        }
+        list.add(sb.toString());
+
+        return list;
+    }
+
+    public static void main(String[] args) throws IOException {
+        String json = getCOVID19_JSON();
+        Map<String, String[]> covid19Str = getCOVID19_Str(json);
+        String[] data = covid19Str.get("summary");
+        for (String datum : data) {
+            System.out.println(datum);
+        }
+        String[] data1 = covid19Str.get("risk");
+        String[] data2 = covid19Str.get("provincial");
+        String[] filter = {"#湖北"};
+        String[] strings = ArrayUtil.addAll(data1, data2);
+        String[] filter1 = filter(strings, filter);
+        for (String s : filter1) {
+            System.out.println(s);
+//            ClipboardUtil.setStr(s);
+        }
+    }
+}

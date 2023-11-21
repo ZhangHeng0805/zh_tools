@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link  href="static/favicon.ico"  rel="shortcut icon" type="image/x-icon" />
+    <title>星曦向荣网</title>
+
+    <script src="static/js/localFile.js" th:version="${js_version}"></script>
+<!--    <link rel="stylesheet" type="text/css" th:href="@{/static/css/base.css}"/>-->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+
+    <script>
+        loadCss("static/css/base.css");
+        eval(loadJs("static/js/jquery-1.11.0.min.js"));
+
+        document.documentElement.className = "js";
+        var supportsCssVars = function () {
+            var e, t = document.createElement("style");
+            return t.innerHTML = "root: { --tmp-var: bold; }", document.head.appendChild(t), e = !!(window.CSS && window.CSS.supports && window.CSS.supports("font-weight", "var(--tmp-var)")), t.parentNode.removeChild(t), e
+        };
+        supportsCssVars() || alert("请在支持CSS变量的现代浏览器中访问此界面");
+    </script>
+</head>
+<body class="demo-2 loading">
+<main>
+    <div class="message">设备显示异常！ &mdash; 请使用电脑等大屏设备访问。</div>
+    <div class="frame">
+        <div class="frame__title-wrap">
+<!--            <h1 class="frame__title">导航栏</h1>-->
+            <div class="frame__links">
+                <a th:href="${weixin_url}"><i class="fa fa-weixin"></i>微信公众号</a>
+                <a th:href="${app_url}" th:title="${app_title}"><i class="fa fa-android"></i><span th:text="${app_name}">ZH Tools</span></a>
+            </div>
+        </div>
+        <a class="frame__github" href="https://github.com/ZhangHeng0805"><i class="fa fa-github"></i>Github</a>
+        <h2 class="frame__pagetitle">星曦向荣网 <span>欢迎来自<code th:text="${address}"></code>的用户！</span></h2>
+    </div>
+    <div class="content">
+        <img th:each="img:${img_url}" class="content__img" th:lsrc="'proxy/request?url='+${img}" src="" onerror="loadImg(this)"></img>
+        <script>
+            function imgload(e) {
+                e.attr("lsrc",window.location.href+e.attr("lsrc"));
+            }
+        </script>
+        <h3 class="content__title">XXXR</h3>
+    </div>
+    <!--/content-->
+</main>
+<!--<script th:src="@{/static/js/imagesloaded.pkgd.min.js}"></script>-->
+<!--<script th:src="@{/static/js/jquery-1.11.0.min.js}"></script>-->
+<!--<script th:src="@{/static/js/TweenMax.min.js}"></script>-->
+<!--<script th:src="@{/static/js/client-info.js}"></script>-->
+<!--<div id="com_js">-->
+<!--    <script th:src="@{/static/js/demo2.js}"></script>-->
+<!--</div>-->
+<script>
+    eval(loadJs("static/js/imagesloaded.pkgd.min.js"));
+    eval(loadJs("static/js/TweenMax.min.js"));
+    eval(loadJs("static/js/client-info.js"));
+    eval(loadJs("static/js/demo2.js"));
+
+    window.onload = function () {
+        // console.log("页面加载完成====》onload");
+        console.group("%c作者信息", "color: red; font-size: 20px;font-weight: bolder");
+        console.log("%c昵称: 星曦向荣", "color: orange; font-style: italic;font-weight: bold");
+        console.log("%c邮箱: zhangheng_0805@163.com", "color: purple; font-style: italic;font-weight: bold");
+        console.log("%cGitHub: https://github.com/ZhangHeng0805", "color: black; font-style: italic;font-weight: bold");
+        console.log("%cGitee: https://gitee.com/ZhangHeng0805", "color: blue; font-style: italic;font-weight: bold");
+        console.log("%c微信公众号: https://mp.weixin.qq.com/s?__biz=MzIwMDQ2OTg4NA==&mid=2247484118&idx=1&sn=30dd3f7f2a4d93a6fdce4fb808e7c506&chksm=96fdfec5a18a77d35645d8e8f55477353aeb9a949fc73a2c302ca336155f8becae635e26f022#rd", "color: green; font-style: italic;font-weight: bold");
+        console.log("%c", "background: url(https://mmbiz.qpic.cn/mmbiz_png/x2YjFdn7BJgkgdQBzWHMlf3XeDXNAd39x1Zqx2LEO8QRjib1jOkDcia7RSq0XhkJsGjVAC4ZvAAtCmicHeBgymYEw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1) no-repeat;padding:50px 300px;line-height:120px");
+        console.groupEnd();
+    };
+</script>
+</body>
+</html>

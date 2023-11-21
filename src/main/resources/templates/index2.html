@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星曦向荣网</title>
+    <script th:src="@{/static/js/localFile.js}"></script>
+    <link rel="stylesheet" type="text/css" th:href="@{/static/css/base.css}"/>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/4.7.0/css/font-awesome.css">
+
+    <script>
+        document.documentElement.className = "js";
+        var supportsCssVars = function () {
+            var e, t = document.createElement("style");
+            return t.innerHTML = "root: { --tmp-var: bold; }", document.head.appendChild(t), e = !!(window.CSS && window.CSS.supports && window.CSS.supports("font-weight", "var(--tmp-var)")), t.parentNode.removeChild(t), e
+        };
+        supportsCssVars() || alert("请在支持CSS变量的现代浏览器中访问此界面");
+    </script>
+</head>
+<body class="demo-6 loading">
+<main>
+    <div class="message">设备显示异常！ &mdash; 请使用电脑等大屏设备访问。</div>
+    <div class="frame">
+        <div class="frame__title-wrap">
+<!--            <h1 class="frame__title">导航栏</h1>-->
+            <div class="frame__links">
+                <a th:href="${weixin_url}"><i class="fa fa-weixin"></i>微信公众号</a>
+                <a th:href="${app_url}" th:title="${app_title}"><i class="fa fa-android"></i><span th:text="${app_name}">ZH Tools</span></a>
+            </div>
+        </div>
+        <a class="frame__github" href="https://github.com/ZhangHeng0805"><i class="fa fa-github"></i>Github</a>
+        <h2 class="frame__pagetitle">星曦向荣网 <span>欢迎来自<code th:text="${address}"></code>的用户！</span></h2>
+    </div>
+    <div class="content">
+        <div th:each="img:${img_url}" class="content__img content__img--full" th:style="'background-image:url('+${img}+');'"></div>
+
+<!--        <div class="content__img content__img&#45;&#45;full" style="background-image:url(/static/img/logo1.png);"></div>-->
+<!--        <div class="content__img content__img&#45;&#45;full" style="background-image:url(/static/img/2.png);"></div>-->
+<!--        <div class="content__img content__img&#45;&#45;full" style="background-image:url(/static/img/3.png);"></div>-->
+<!--        <img class="content__img" th:src="@{/static/img/logo1.png}" alt="logo"/>-->
+<!--        <img class="content__img" th:src="@{/static/img/1.png}" alt="收款码1"/>-->
+<!--        <img class="content__img" th:src="@{/static/img/2.png}" alt="收款码2"/>-->
+<!--        <img class="content__img" th:src="@{/static/img/3.png}" alt="微信公众号"/>-->
+        <h3 class="content__title">XXXR</h3>
+    </div>
+    <!--/content-->
+</main>
+<script th:src="@{/static/js/imagesloaded.pkgd.min.js}"></script>
+<script th:src="@{/static/js/jquery-1.11.0.min.js}"></script>
+<script th:src="@{/static/js/TweenMax.min.js}"></script>
+<!--<script th:src="@{/static/js/bootsnav.js}"></script>-->
+<!--<script th:src="@{/static/js/init.js}"></script>-->
+<script th:src="@{/static/js/client-info.js}"></script>
+<div id="com_js">
+    <script th:src="@{/static/js/demo6.js}"></script>
+</div>
+</body>
+</html>
