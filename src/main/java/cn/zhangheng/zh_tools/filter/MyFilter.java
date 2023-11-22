@@ -32,7 +32,9 @@ public abstract class MyFilter implements Filter {
 //    public static List<Map<String,Object>> vivMaps=new ArrayList<>();
 
     public  MySession.Visit getVisitor(HttpServletRequest req){
-        return mySession.find(CusAccessObjectUtil.getClientIp(req,setting.getIpHeaders()), CusAccessObjectUtil.getUser_Agent(req));
+        String user_agent = CusAccessObjectUtil.getUser_Agent(req);
+        user_agent=user_agent!=null ? user_agent: "";
+        return mySession.find(CusAccessObjectUtil.getClientIp(req,setting.getIpHeaders()), user_agent);
     }
     /**
      * 地址过滤判断

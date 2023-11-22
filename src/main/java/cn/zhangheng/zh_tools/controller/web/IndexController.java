@@ -6,11 +6,9 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONUtil;
-import cn.zhangheng.zh_tools.bean.AndroidLog;
-import cn.zhangheng.zh_tools.bean.PhoneInfo;
-import cn.zhangheng.zh_tools.bean.SettingConfig;
-import cn.zhangheng.zh_tools.bean.Visitor;
+import cn.zhangheng.zh_tools.bean.*;
 import cn.zhangheng.zh_tools.dao.AndroidLogDao;
+import cn.zhangheng.zh_tools.dao.IPBlackDao;
 import cn.zhangheng.zh_tools.dao.PhoneInfoDao;
 import cn.zhangheng.zh_tools.service.APPCommandService;
 import cn.zhangheng.zh_tools.service.ConfigureService;
@@ -65,6 +63,8 @@ public class IndexController {
     private HtmlService htmlService;
     @Autowired
     private VisitorService visitorService;
+    @Autowired
+    private IPBlackDao ipBlackDao;
 
 
     @GetMapping("/")
@@ -291,5 +291,42 @@ public class IndexController {
         if (StrUtil.isBlank(time))
             time= TimeUtil.toTime(new Date(),"yyyy-MM-dd");
         return htmlService.getHtmlString1(time).toString();
+    }
+
+
+    @ResponseBody
+    @RequestMapping("/ip")
+    private Message ip(String ip,String flag){
+        Message msg = new Message();
+        if (!StrUtil.isBlank(ip)&&!StrUtil.isBlank(flag)){
+            if(flag.equals("w")||flag.equals("b")) {
+                Optional<Visitor> byId = visitorService.findById(ip);
+                if (byId.isPresent()) {
+                    IPBlack black = new IPBlack();
+                    black.setIp(ip);
+                    black.setAdd_time(new Date());
+                    black.setExplain(byId.get().getLocation());
+                    black.setFlag(flag);
+                    IPBlack black1 = ipBlackDao.saveAndFlush(black);
+                    msg.setCode(200);
+                    String s=flag.equals("w")?"白":"黑";
+                    msg.setTitle("IP"+s+"名单编辑成功");
+                    msg.setObj(black1);
+                }else {
+                    msg.setCode(500);
+                    msg.setTitle("ip错误");
+                    msg.setMessage("ip未知，不存在");
+                }
+            }else {
+                msg.setCode(500);
+                msg.setTitle("参数错误");
+                msg.setMessage("参数flag错误");
+            }
+        }else {
+            msg.setCode(500);
+            msg.setTitle("参数为空");
+            msg.setMessage("参数ip和flag不能为空");
+        }
+        return msg;
     }
 }

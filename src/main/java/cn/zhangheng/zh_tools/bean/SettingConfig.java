@@ -45,7 +45,6 @@ public class SettingConfig {
     private String appDownLoadUrl;
     @NotNull
     private String dataHost;
-    @NotNull
     private String dataPwd;
     @NotNull
     @URL
